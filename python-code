@@ -97,14 +97,17 @@ def get_sheets_service():
         service = build('sheets', 'v4', credentials=creds)
         return service
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred in get_sheets_service: {e}")
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"Service account file exists: {os.path.exists(SERVICE_ACCOUNT_FILE)}")
         return None
-    
-    service = build('sheets', 'v4', credentials=creds)
-    return service
 
 def write_to_google_sheet(itinerary):
     service = get_sheets_service()
+    if service is None:
+        print("Failed to obtain Google Sheets service. Check your credentials and permissions.")
+        return
+
     sheet = service.spreadsheets()
     
     spreadsheet_id = '1YQxfUelJPoym1ZkpszXa9B7oMddkhCQ-eCv0V10iuS8'
