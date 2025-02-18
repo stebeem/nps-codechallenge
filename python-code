@@ -89,7 +89,7 @@ def generate_itinerary(parks):
 
 def get_sheets_service():
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-    SERVICE_ACCOUNT_FILE = 'path/to/your/service-account-key.json'
+    SERVICE_ACCOUNT_FILE = 'googleapi.json'
 
     try:
         creds = service_account.Credentials.from_service_account_file(
