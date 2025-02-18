@@ -146,4 +146,4 @@ def main():
     write_to_google_sheet(itinerary)
 
 if __name__ == "__main__":
-main()
+    main()
