@@ -1,5 +1,6 @@
 import os
 import urllib.parse
+import tempfile
 import requests
 from datetime import datetime, timedelta
 from google.oauth2 import service_account
@@ -82,18 +83,29 @@ def generate_itinerary(parks):
 
 def get_sheets_service():
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-    SERVICE_ACCOUNT_FILE = os.environ.get('GOOGLE_SERVICE_ACCOUNT_DATA')
+    SERVICE_ACCOUNT_DATA = os.environ.get('GOOGLE_SERVICE_ACCOUNT_DATA')
+
+    if not SERVICE_ACCOUNT_DATA:
+        print("GOOGLE_SERVICE_ACCOUNT_DATA environment variable is not set")
+        return None
+
+    # Write service account data to a temporary file
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
+        temp_file.write(SERVICE_ACCOUNT_DATA)
+        temp_file_path = temp_file.name
 
     try:
         creds = service_account.Credentials.from_service_account_file(
-            SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+            temp_file_path, scopes=SCOPES)
         service = build('sheets', 'v4', credentials=creds)
         return service
     except Exception as e:
         print(f"An error occurred in get_sheets_service: {e}")
-        print(f"Current working directory: {os.getcwd()}")
-        print(f"Service account file exists: {os.path.exists(SERVICE_ACCOUNT_FILE)}")
-        return None
+    finally:
+        # Clean up the temporary file
+        os.unlink(temp_file_path)
+
+    return None
 
 def generate_google_maps_link(itinerary):
     base_url = "https://www.google.com/maps/dir/"
