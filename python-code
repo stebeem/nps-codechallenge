@@ -1,28 +1,19 @@
+import os
 import requests
 from datetime import datetime, timedelta
-from google.oauth2.credentials import Credentials
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
-from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import Flow
-import os
-import urllib.parse
 
 # Constants
-NPS_API_KEY = ${{ secrets.NPS_API_KEY }}
+NPS_API_KEY = os.environ.get('NPS_API_KEY')
 NPS_API_BASE_URL = "https://developer.nps.gov/api/v1"
 WEATHER_API_BASE_URL = "https://api.weather.gov"
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+SPREADSHEET_ID = os.environ.get('SPREADSHEET_ID')
 
 # Google OAuth Client Configuration
-CLIENT_CONFIG = {
-    "installed": {
-        "client_id": ${{ secrets.GOOGLE_CLIENT_ID }},
-        "client_secret": ${{ secrets.GOOGLE_CLIENT_SECRET }},
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-    }
-}
+CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 
 def get_parks(filter_type, filter_value):
     url = f'{NPS_API_BASE_URL}/parks?api_key={NPS_API_KEY}'
@@ -90,7 +81,7 @@ def generate_itinerary(parks):
 
 def get_sheets_service():
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-    SERVICE_ACCOUNT_FILE = 'googleapi.json'
+    SERVICE_ACCOUNT_FILE = os.environ.get('GOOGLE_SERVICE_ACCOUNT_DATA')
 
     try:
         creds = service_account.Credentials.from_service_account_file(
@@ -117,7 +108,6 @@ def write_to_google_sheet(itinerary):
 
     sheet = service.spreadsheets()
     
-    spreadsheet_id = ${{ secrets.SPREADSHEET_ID }}
     range_name = 'Sheet1!A1'  # Adjust as needed
     
     values = [
