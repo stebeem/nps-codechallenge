@@ -32,5 +32,5 @@ jobs:
         GOOGLE_SERVICE_ACCOUNT_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_DATA }}
         NPS_API_KEY: ${{ secrets.NPS_API_KEY }}
         SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-      run: python python-code.py
+      run: python python-code
 
