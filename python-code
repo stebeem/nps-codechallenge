@@ -148,7 +148,7 @@ def write_to_google_sheet(itinerary):
 def main():
  parks = get_parks("state", "CA")
     
-    for park in parks:
+ for park in parks:
         lat, lon = park['latitude'], park['longitude']
         visit_date = (datetime.now() + timedelta(days=parks.index(park))).strftime('%Y-%m-%d')
         park['weather'] = get_weather(lat, lon, visit_date)
