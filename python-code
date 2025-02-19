@@ -6,6 +6,7 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import Flow
 import os
+import urllib.parse
 
 # Constants
 NPS_API_KEY = "8Gw0iRf8bsaJQ06eTpgwcOUwcrEbIEPcyyirVGVh"
@@ -102,6 +103,12 @@ def get_sheets_service():
         print(f"Service account file exists: {os.path.exists(SERVICE_ACCOUNT_FILE)}")
         return None
 
+def generate_google_maps_link(itinerary):
+    base_url = "https://www.google.com/maps/dir/"
+    waypoints = [f"{park['name']}, {park['state']}" for park in itinerary]
+    encoded_waypoints = [urllib.parse.quote(wp) for wp in waypoints]
+    return base_url + "/".join(encoded_waypoints)
+
 def write_to_google_sheet(itinerary):
     service = get_sheets_service()
     if service is None:
@@ -122,7 +129,14 @@ def write_to_google_sheet(itinerary):
         for park in itinerary
     ]
     
+    # Generate Google Maps link and add it to the sheet
+    google_maps_link = generate_google_maps_link(itinerary)
+    
+    # Append the Google Maps link to the values list
+    values.append(['', '', '', '', '', '', '', '', 'Road Trip Map:', google_maps_link])
+    
     body = {'values': values}
+    
     result = sheet.values().update(
         spreadsheetId=spreadsheet_id, range=range_name,
         valueInputOption='USER_ENTERED', body=body).execute()
@@ -145,7 +159,7 @@ def main():
     # 4. Generate itinerary
     itinerary = generate_itinerary(sorted_parks)
     
-    # 5. Write to Google Sheet
+    # 5. Write to Google Sheet (now includes Google Maps link)
     write_to_google_sheet(itinerary)
 
 if __name__ == "__main__":
