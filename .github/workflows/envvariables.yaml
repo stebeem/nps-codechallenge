@@ -1,4 +1,10 @@
 name: Run Python Script
+ env:
+        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        GOOGLE_SERVICE_ACCOUNT_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_DATA }}
+        NPS_API_KEY: ${{ secrets.NPS_API_KEY }}
+        SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
 
 on:
   push:
@@ -26,10 +32,5 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Python script
-      env:
-        GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-        GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        GOOGLE_SERVICE_ACCOUNT_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_DATA }}
-        NPS_API_KEY: ${{ secrets.NPS_API_KEY }}
-        SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+     
       run: python python-code
