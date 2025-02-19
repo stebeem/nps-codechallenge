@@ -9,7 +9,7 @@ import os
 import urllib.parse
 
 # Constants
-NPS_API_KEY = "8Gw0iRf8bsaJQ06eTpgwcOUwcrEbIEPcyyirVGVh"
+NPS_API_KEY = ${{ secrets.NPS_API_KEY }}
 NPS_API_BASE_URL = "https://developer.nps.gov/api/v1"
 WEATHER_API_BASE_URL = "https://api.weather.gov"
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
@@ -17,8 +17,8 @@ SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 # Google OAuth Client Configuration
 CLIENT_CONFIG = {
     "installed": {
-        "client_id": "24418766967-jmp3qj9edugumkksosbvo2ph487h232s.apps.googleusercontent.com",
-        "client_secret": "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",
+        "client_id": ${{ secrets.GOOGLE_CLIENT_ID }},
+        "client_secret": ${{ secrets.GOOGLE_CLIENT_SECRET }},
         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
         "token_uri": "https://oauth2.googleapis.com/token",
     }
@@ -117,7 +117,7 @@ def write_to_google_sheet(itinerary):
 
     sheet = service.spreadsheets()
     
-    spreadsheet_id = '1YQxfUelJPoym1ZkpszXa9B7oMddkhCQ-eCv0V10iuS8'
+    spreadsheet_id = ${{ secrets.SPREADSHEET_ID }}
     range_name = 'Sheet1!A1'  # Adjust as needed
     
     values = [
