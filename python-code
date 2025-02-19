@@ -146,9 +146,9 @@ def write_to_google_sheet(itinerary):
         print(f"Park {park_to_update} not found in existing data.")
 
 def main():
- parks = get_parks("state", "CA")
+    parks = get_parks("state", "CA")
     
- for park in parks:
+    for park in parks:
         lat, lon = park['latitude'], park['longitude']
         visit_date = (datetime.now() + timedelta(days=parks.index(park))).strftime('%Y-%m-%d')
         park['weather'] = get_weather(lat, lon, visit_date)
@@ -156,5 +156,6 @@ def main():
     sorted_parks = sort_parks(parks, "sunniest")
     itinerary = generate_itinerary(sorted_parks)
     write_to_google_sheet(itinerary)
+
 if __name__ == "__main__":
     main()
