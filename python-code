@@ -1,4 +1,5 @@
 import os
+import urllib.parse
 import requests
 from datetime import datetime, timedelta
 from google.oauth2 import service_account
@@ -108,34 +109,52 @@ def write_to_google_sheet(itinerary):
 
     sheet = service.spreadsheets()
     
-    range_name = 'Sheet1!A1'  # Adjust as needed
+    # Find the row to update (for example, based on the park name)
+    park_to_update = "Yosemite National Park"
+    row_to_update = None
     
-    values = [
-        ['Order', 'Park Name', 'State', 'Visit Date', 'Forecast High', 'Forecast Low', 'Weather', 'Wind Speed', 'NPS Link', 'Directions']
-    ] + [
-        [park['order'], park['name'], park['state'], park['visit_date'], 
-         park['forecast_high'], park['forecast_low'], park['weather'], 
-         park['wind_speed'], park['nps_link'], park['directions']]
-        for park in itinerary
-    ]
+    # First, read the existing data
+    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range="Sheet1!A:J").execute()
+    existing_data = result.get('values', [])
     
-    # Generate Google Maps link and add it to the sheet
-    google_maps_link = generate_google_maps_link(itinerary)
+    for i, row in enumerate(existing_data):
+        if row and row[1] == park_to_update:
+            row_to_update = i + 1
+            break
     
-    # Append the Google Maps link to the values list
-    values.append(['', '', '', '', '', '', '', '', 'Road Trip Map:', google_maps_link])
-    
-    body = {'values': values}
-    
-    result = sheet.values().update(
-        spreadsheetId=spreadsheet_id, range=range_name,
-        valueInputOption='USER_ENTERED', body=body).execute()
-    
-    print(f"{result.get('updatedCells')} cells updated.")
+    if row_to_update:
+        range_name = f'Sheet1!A{row_to_update}:J{row_to_update}'
+        
+        # Prepare the data for the specific park
+        park = next((p for p in itinerary if p['name'] == park_to_update), None)
+        if park:
+            values = [[
+                park['order'], park['name'], park['state'], park['visit_date'],
+                park['forecast_high'], park['forecast_low'], park['weather'],
+                park['wind_speed'], park['nps_link'], park['directions']
+            ]]
+            
+            body = {'values': values}
+            result = sheet.values().update(
+                spreadsheetId=SPREADSHEET_ID, range=range_name,
+                valueInputOption='USER_ENTERED', body=body).execute()
+            
+            print(f"{result.get('updatedCells')} cells updated.")
+        else:
+            print(f"Park {park_to_update} not found in itinerary.")
+    else:
+        print(f"Park {park_to_update} not found in existing data.")
 
 def main():
-    # Your main function implementation
-    pass
-
+ parks = get_parks("state", "CA")
+    
+    for park in parks:
+        lat, lon = park['latitude'], park['longitude']
+        visit_date = (datetime.now() + timedelta(days=parks.index(park))).strftime('%Y-%m-%d')
+        park['weather'] = get_weather(lat, lon, visit_date)
+    
+    sorted_parks = sort_parks(parks, "sunniest")
+    itinerary = generate_itinerary(sorted_parks)
+    write_to_google_sheet(itinerary)
 if __name__ == "__main__":
     main()
