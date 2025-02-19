@@ -4,7 +4,6 @@ on:
   schedule:
     # Run on the 1st, 15th, and last day of each month
     - cron: "0 0 1,15 * *"
-    - cron: "0 0 L * *"
   workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
