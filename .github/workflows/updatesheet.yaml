@@ -37,7 +37,7 @@ jobs:
 
       # Step 5: Run the Python script with the correct working directory
       - name: Run Python script
-        run: python stebeem/nps-codechallenge/python-code.py
+        run: python python-code
         working-directory: ${{ github.workspace }}
         env:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
