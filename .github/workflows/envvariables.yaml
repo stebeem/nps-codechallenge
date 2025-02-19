@@ -1,5 +1,5 @@
 name: Run Python Script
- env:
+env:
         GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         GOOGLE_SERVICE_ACCOUNT_DATA: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_DATA }}
