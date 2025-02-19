@@ -18,6 +18,9 @@ CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET')
 SERVICE_ACCOUNT_DATA = os.environ.get('GOOGLE_SERVICE_ACCOUNT_DATA')
 
+print(f"NPS_API_KEY: {os.environ.get('NPS_API_KEY')}")
+print(f"SPREADSHEET_ID: {os.environ.get('SPREADSHEET_ID')}")
+
 
 def get_parks(filter_type, filter_value):
     url = f'{NPS_API_BASE_URL}/parks?api_key={NPS_API_KEY}'
