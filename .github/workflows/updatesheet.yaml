@@ -2,8 +2,9 @@ name: Automate Data Retrieval and Sheet Updates
 
 on:
   schedule:
-    # Run every day at midnight UTC
-    - cron: "0 0 * * *"
+    # Run on the 1st, 15th, and last day of each month
+    - cron: "0 0 1,15 * *"
+    - cron: "0 0 L * *"
   workflow_dispatch: # Allows manual triggering of the workflow
 
 jobs:
@@ -31,12 +32,17 @@ jobs:
       - name: Set up Google API credentials
         run: echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_DATA }}" > googleapi.json
 
-      # Step 5: Run the Python script
+      # Debugging step to list files in the current directory
+      - name: List files in current directory
+        run: ls -la ${{ github.workspace }}
+
+      # Step 5: Run the Python script with the correct working directory
       - name: Run Python script
+        run: python python-code.py
+        working-directory: ${{ github.workspace }}
         env:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
-        run: python python-code.py
 
-      # Optional Step 6: Clean up sensitive files (e.g., remove googleapi.json)
+      # Step 6: Clean up sensitive files (e.g., remove googleapi.json)
       - name: Clean up credentials
         run: rm googleapi.json
