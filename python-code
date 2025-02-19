@@ -61,7 +61,7 @@ def get_weather(lat, lon, date):
 
 def sort_parks(parks, sort_method):
     if sort_method == "sunniest":
-        return sorted(parks, key=lambda x: x.get('weather', {}).get('conditions', '') == 'Sunny', reverse=True)
+        return sorted(parks, key=lambda x: (x.get('weather') or {}).get('conditions', '') == 'Sunny', reverse=True)
     elif sort_method == "most_activities":
         return sorted(parks, key=lambda x: len(x.get('activities', [])), reverse=True)
     # Add more sorting methods as needed
