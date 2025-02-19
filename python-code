@@ -6,101 +6,15 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import Flow
 import os
+import urllib.parse
 
-# Constants
-NPS_API_KEY = "8Gw0iRf8bsaJQ06eTpgwcOUwcrEbIEPcyyirVGVh"
-NPS_API_BASE_URL = "https://developer.nps.gov/api/v1"
-WEATHER_API_BASE_URL = "https://api.weather.gov"
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+# ... (keep all your existing constants and imports)
 
-# Google OAuth Client Configuration
-CLIENT_CONFIG = {
-    "installed": {
-        "client_id": "24418766967-jmp3qj9edugumkksosbvo2ph487h232s.apps.googleusercontent.com",
-        "client_secret": "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",
-        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-        "token_uri": "https://oauth2.googleapis.com/token",
-    }
-}
-
-def get_parks(filter_type, filter_value):
-    url = f'{NPS_API_BASE_URL}/parks?api_key={NPS_API_KEY}'
-    
-    if filter_type == 'state':
-        url += f'&stateCode={filter_value}'
-    elif filter_type == 'activities':
-        url += f'&q={filter_value}'
-    elif filter_type == 'historical_relevance':
-        url += f'&q={filter_value}'
-    
-    response = requests.get(url)
-    if response.status_code == 200:
-        parks = response.json().get('data', [])
-        return parks[:5]  # Return only the first 5 parks
-    else:
-        print(f'Error fetching parks: {response.status_code} - {response.text}')
-        return []
-
-def get_weather(lat, lon, date):
-    url = f"{WEATHER_API_BASE_URL}/points/{lat},{lon}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        forecast_url = response.json()['properties']['forecast']
-        forecast_response = requests.get(forecast_url)
-        if forecast_response.status_code == 200:
-            forecasts = forecast_response.json()['properties']['periods']
-            for forecast in forecasts:
-                if forecast['startTime'].split('T')[0] == date:
-                    return {
-                        'high': forecast['temperature'],
-                        'low': forecast['temperature'],  # Assuming the low is the same as high for simplicity
-                        'conditions': forecast['shortForecast'],
-                        'wind_speed': forecast['windSpeed'],
-                        'humidity': 50  # Humidity is not provided, using a placeholder
-                    }
-    return None
-
-def sort_parks(parks, sort_method):
-    if sort_method == "sunniest":
-        return sorted(parks, key=lambda x: x['weather']['conditions'] == 'Sunny', reverse=True)
-    elif sort_method == "most_activities":
-        return sorted(parks, key=lambda x: len(x.get('activities', [])), reverse=True)
-    # Add more sorting methods as needed
-    return parks
-
-def generate_itinerary(parks):
-    itinerary = []
-    start_date = datetime.now().date()
-    for i, park in enumerate(parks):
-        visit_date = start_date + timedelta(days=i)
-        itinerary.append({
-            'order': i + 1,
-            'name': park['fullName'],
-            'state': park['states'],
-            'visit_date': visit_date.strftime('%Y-%m-%d'),
-            'forecast_high': park['weather']['high'],
-            'forecast_low': park['weather']['low'],
-            'weather': park['weather']['conditions'],
-            'wind_speed': park['weather']['wind_speed'],
-            'nps_link': park['url'],
-            'directions': park['directionsUrl']
-        })
-    return itinerary
-
-def get_sheets_service():
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-    SERVICE_ACCOUNT_FILE = 'googleapi.json'
-
-    try:
-        creds = service_account.Credentials.from_service_account_file(
-            SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-        service = build('sheets', 'v4', credentials=creds)
-        return service
-    except Exception as e:
-        print(f"An error occurred in get_sheets_service: {e}")
-        print(f"Current working directory: {os.getcwd()}")
-        print(f"Service account file exists: {os.path.exists(SERVICE_ACCOUNT_FILE)}")
-        return None
+def generate_google_maps_link(itinerary):
+    base_url = "https://www.google.com/maps/dir/"
+    waypoints = [f"{park['name']}, {park['state']}" for park in itinerary]
+    encoded_waypoints = [urllib.parse.quote(wp) for wp in waypoints]
+    return base_url + "/".join(encoded_waypoints)
 
 def write_to_google_sheet(itinerary):
     service = get_sheets_service()
@@ -122,12 +36,18 @@ def write_to_google_sheet(itinerary):
         for park in itinerary
     ]
     
+    # Generate and add Google Maps link
+    google_maps_link = generate_google_maps_link(itinerary)
+    values.append(['', '', '', '', '', '', '', '', 'Road Trip Map', google_maps_link])
+    
     body = {'values': values}
     result = sheet.values().update(
         spreadsheetId=spreadsheet_id, range=range_name,
         valueInputOption='USER_ENTERED', body=body).execute()
     
     print(f"{result.get('updatedCells')} cells updated.")
+
+# ... (keep all your other functions unchanged)
 
 def main():
     # 1. Select parks
@@ -145,7 +65,7 @@ def main():
     # 4. Generate itinerary
     itinerary = generate_itinerary(sorted_parks)
     
-    # 5. Write to Google Sheet
+    # 5. Write to Google Sheet (now includes Google Maps link)
     write_to_google_sheet(itinerary)
 
 if __name__ == "__main__":
