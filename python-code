@@ -134,23 +134,8 @@ def write_to_google_sheet(itinerary):
     print(f"{result.get('updatedCells')} cells updated.")
 
 def main():
-    # 1. Select parks
-    parks = get_parks("state", "CA")
-    
-    # 2. Retrieve weather for each park
-    for park in parks:
-        lat, lon = park['latitude'], park['longitude']
-        visit_date = (datetime.now() + timedelta(days=parks.index(park))).strftime('%Y-%m-%d')
-        park['weather'] = get_weather(lat, lon, visit_date)
-    
-    # 3. Sort parks
-    sorted_parks = sort_parks(parks, "sunniest")
-    
-    # 4. Generate itinerary
-    itinerary = generate_itinerary(sorted_parks)
-    
-    # 5. Write to Google Sheet (now includes Google Maps link)
-    write_to_google_sheet(itinerary)
+    # Your main function implementation
+    pass
 
 if __name__ == "__main__":
     main()
